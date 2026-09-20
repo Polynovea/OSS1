@@ -44,14 +44,15 @@ async function findAuthUserByEmail(client, email) {
 loadLocalEnv();
 const args = parseArgs(process.argv.slice(2));
 if (Object.prototype.hasOwnProperty.call(args, "help")) {
-  console.log('Usage: npm run bootstrap:admin -- --email=owner@example.com [--username=owner] [--display-name="Owner"] [--workspace=polynovea]');
-  console.log("Create the auth identity first; this command binds it to the auditable CMS master/owner profile.");
+  console.log('Usage: npm run bootstrap:admin -- --email=owner@example.com [--password=change-me-now] [--username=owner] [--display-name="Owner"] [--workspace=polynovea]');
+  console.log("When --password or POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD is set, a missing auth identity is created automatically.");
   process.exit(0);
 }
 const email = String(args.email || process.env.POLYNOVEA_BOOTSTRAP_ADMIN_EMAIL || "").trim().toLowerCase();
 const username = String(args.username || process.env.POLYNOVEA_BOOTSTRAP_ADMIN_USERNAME || defaultUsername(email)).trim().toLowerCase();
 const displayName = String(args["display-name"] || process.env.POLYNOVEA_BOOTSTRAP_ADMIN_DISPLAY_NAME || username).trim();
 const workspaceSlug = String(args.workspace || process.env.POLYNOVEA_DEFAULT_WORKSPACE_SLUG || "polynovea").trim().toLowerCase();
+const password = String(args.password || process.env.POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD || "");
 
 if (!email || !email.includes("@")) {
   console.error("Usage: npm run bootstrap:admin -- --email=owner@example.com [--username=owner] [--display-name=\"Owner\"]");
@@ -74,9 +75,18 @@ const client = createClient(supabaseUrl, serviceRoleKey, {
 });
 
 try {
-  const authUser = await findAuthUserByEmail(client, email);
+  let authUser = await findAuthUserByEmail(client, email);
   if (!authUser) {
-    throw new Error(`No Supabase Auth user exists for ${email}. Create that identity in the configured auth service first, then rerun bootstrap:admin.`);
+    if (password.length < 8) {
+      throw new Error(`No Supabase Auth user exists for ${email}. Set POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD (8+ characters) to create it, or create the identity first.`);
+    }
+    const { data, error } = await client.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (error || !data.user) throw error || new Error(`Failed to create the auth identity for ${email}.`);
+    authUser = data.user;
   }
 
   const { data: existing, error: existingError } = await client

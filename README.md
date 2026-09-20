@@ -19,7 +19,29 @@ Docker is **optional packaging only**. It is not required to install, develop, c
 
 See [PostgreSQL and self-hosting](docs/self-hosting/POSTGRESQL.md) for the exact portability boundary.
 
-## Quick start
+## Five-minute local evaluation
+
+The fastest evaluation path uses Docker Desktop or Docker Engine with Compose. It creates an isolated PostgreSQL, PostgREST, GoTrue, CMS and delivery-worker stack; creates the first owner; and seeds a demonstration content model and entry.
+
+```bash
+npm ci
+npm run local:setup -- --email=owner@example.com --password=change-me-now
+```
+
+Open `http://localhost:3210` and sign in with those credentials. Runtime data and generated secrets are stored under `.polynovea-local/`, which is ignored by Git. Use a strong, unique password outside disposable local evaluation.
+
+Useful lifecycle commands:
+
+```bash
+$env:POLYNOVEA_LOCAL_RUNTIME_CONTROL="1" # PowerShell
+npm run local:runtime -- status --directory=.polynovea-local
+npm run local:runtime -- backup --directory=.polynovea-local
+npm run local:runtime -- stop --directory=.polynovea-local
+```
+
+On macOS/Linux, use `export POLYNOVEA_LOCAL_RUNTIME_CONTROL=1`. Pass `--no-demo` to `local:setup` for an empty workspace. See the [complete local quickstart](docs/getting-started/LOCAL_QUICKSTART.md).
+
+## Managed Supabase quick start
 
 ### 1. Prerequisites
 
@@ -57,13 +79,13 @@ The migration runner applies the numbered files in `supabase/migrations/` in ord
 
 ### 5. Create the first administrator
 
-Create the first identity in the configured Supabase/GoTrue auth service, then bind it to the CMS owner role with the server-only bootstrap command:
+Create and bind the first CMS owner with the server-only bootstrap command. Prefer the environment variable form so the password is not retained in shell history:
 
 ```bash
-npm run bootstrap:admin -- --email=owner@example.com --username=owner --display-name="Site Owner"
+POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD='choose-a-strong-password' npm run bootstrap:admin -- --email=owner@example.com --username=owner --display-name="Site Owner"
 ```
 
-The bootstrap command requires the configured service-role key. It creates or repairs the auditable `admin_users` profile, default-workspace membership and `owner` role assignment. There is no hardcoded master-email bypass in the runtime.
+PowerShell users can set `$env:POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD` before running the command. If that auth identity already exists, the password is not changed and may be omitted. The bootstrap command requires the configured service-role key and creates or repairs the auditable `admin_users` profile, default-workspace membership and `owner` role assignment. There is no hardcoded master-email bypass in the runtime. See the [managed Supabase guide](docs/getting-started/MANAGED_SUPABASE.md) for the complete deployment sequence.
 
 ### 6. Start the application
 
@@ -90,9 +112,9 @@ npm run worker:delivery
 
 The worker requires `DATABASE_URL` and any credentials needed by the enabled adapters.
 
-## Optional local container profile
+## Local container profile
 
-`deploy/local/` and `scripts/local-runtime.mjs` provide an optional packaged Supabase-compatible local profile for operators who want containers. This is a convenience path only and is not an OSS V1 release requirement.
+`deploy/local/` and the local-runtime scripts provide a reproducible Supabase-compatible evaluation and development profile. Managed Supabase remains the reference production path; the container profile is intended for local evaluation, development, backup/restore exercises and contribution testing.
 
 ## Architecture and security
 
@@ -145,8 +167,12 @@ The configured PostgreSQL role must be allowed to create and drop the disposable
 - non-Supabase authentication is future portability work;
 - a direct generic-PostgreSQL application adapter is not certified for V1;
 - the R2 adapter is the first-class supplied media adapter; other S3-compatible providers may require configuration/adapter work;
-- Docker/Compose is optional packaging, not part of the required V1 path.
+- the local Docker profile is intended for evaluation and development; production operators should use a supported managed or self-hosted Supabase-compatible deployment and an external worker process.
+
+## Headless delivery
+
+Polynovea is a headless CMS and content-operations control plane. It does not impose a public-site theme. Published content is consumed through scoped `/api/v1/content/*` endpoints or the TypeScript SDK. A minimal Next.js consumer is included in [`examples/nextjs-site`](examples/nextjs-site).
 
 ## Project documentation
 
-Read [operations runbooks](docs/operations/RUNBOOKS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [SECURITY.md](SECURITY.md), and [ROADMAP.md](ROADMAP.md) before operating a public instance.
+Read [operations runbooks](docs/operations/RUNBOOKS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [SECURITY.md](SECURITY.md), [SUPPORT.md](SUPPORT.md), and [ROADMAP.md](ROADMAP.md) before operating a public instance.

@@ -7,6 +7,7 @@ build/
 .env.local
 .env.*.local
 .vercel/
+.polynovea-local/
 out/
 .turbo/
 *.tsbuildinfo
@@ -17,3 +18,4 @@ ui-ux-pro-max-skill/
 BACKEND_SPEC.md
 
 .vercel
+.polynovea-local/

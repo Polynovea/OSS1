@@ -8,12 +8,17 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - run: node node_modules/typescript/bin/tsc --noEmit
+      - run: npm run typecheck
       - run: npm run lint
       - run: npm test
       - run: npm run build
       - run: npm run sdk:build
       - run: npm run cms -- --help
+      - run: npm run local:setup -- --help
+      - run: npm ci --prefix examples/nextjs-site
+      - run: npm run typecheck --prefix examples/nextjs-site
+      - run: npm run build --prefix examples/nextjs-site
+      - run: npm audit --omit=dev --prefix examples/nextjs-site
       - run: git diff --check
       - run: npm audit --omit=dev
   secret-scan:
@@ -22,3 +27,47 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - uses: gitleaks/gitleaks-action@v2
+  database-certification:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:15.8.1.085
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx vitest run lib/infrastructure/databaseProvisioning.test.ts
+  local-stack-certification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - name: Start, provision, and seed the complete local stack
+        run: npm run local:setup -- --email=owner@example.com --password=local-ci-password
+      - name: Verify the CMS and gateway are reachable
+        run: |
+          curl --fail --silent --show-error http://localhost:3210/admin/login > /dev/null
+          curl --fail --silent --show-error http://localhost:54321/auth/v1/health > /dev/null
+      - name: Print service logs after a failure
+        if: failure()
+        run: docker compose --env-file .polynovea-local/runtime.env -f deploy/local/docker-compose.yml logs --no-color
+      - name: Stop the local stack
+        if: always()
+        env:
+          POLYNOVEA_LOCAL_RUNTIME_CONTROL: "1"
+        run: node scripts/local-runtime.mjs stop --directory=.polynovea-local
