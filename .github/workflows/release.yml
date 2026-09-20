@@ -25,7 +25,7 @@ jobs:
       - run: git diff --check
       - run: npm audit --omit=dev
       - name: Scan full Git history for secrets
-        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.0 detect --source=/repo --redact --verbose
+        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.0 detect --source=/repo --config=/repo/.gitleaks.toml --redact --verbose
       - name: Validate release version
         env:
           RELEASE_VERSION: ${{ inputs.version }}

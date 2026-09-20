@@ -1,0 +1,14 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Documented placeholder token in the developer UI"
+regexTarget = "line"
+regexes = ['''Authorization: Bearer pnv_YOUR_TOKEN''']
+paths = ['''app/admin/developer/page\.tsx''']
+
+[[allowlists]]
+description = "Non-secret content-model API key used by a test fixture"
+regexTarget = "line"
+regexes = ['''apiKey: "phase5_verification"''']
+paths = ['''scripts/create-phase5-verification-fixture\.mjs''']
