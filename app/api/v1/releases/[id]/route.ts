@@ -1,0 +1,5 @@
+import { requireDeveloperApi } from "@/lib/developer/apiAuth";
+import { apiError, apiSuccess } from "@/lib/developer/apiContract";
+import { getRelease, getReleaseReadiness } from "@/lib/content/releaseService";
+
+export async function GET(req:Request,{params}:{params:Promise<{id:string}>}){const auth=await requireDeveloperApi(req,{scope:"releases.read"});if(auth.error)return auth.error;const {id}=await params;const release=await getRelease(auth.data!.workspaceId,id);if(!release)return apiError("RELEASE_NOT_FOUND","Release not found",404,{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});if(auth.data!.allowedModels.length){const denied=(release.release_items??[]).some((item:any)=>!auth.data!.allowedModels.includes(item.content_entries?.content_models?.api_key));if(denied)return apiError("MODEL_RESTRICTED","Release contains content outside this token's model allowlist",403,{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});}const readiness=await getReleaseReadiness(auth.data!.workspaceId,id);return apiSuccess({release,readiness:readiness.ok?readiness.data:null},{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});}

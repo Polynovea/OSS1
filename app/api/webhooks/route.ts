@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { requirePlatformAccess } from "@/lib/platform/permissions";
+import { createWebhookSubscription, listWebhookSubscriptions } from "@/lib/content/webhookService";
+export async function GET(req: Request) { const auth = await requirePlatformAccess(req, { permission: "content.entry.read" }); if (auth.error) return auth.error; return NextResponse.json({ success: true, data: await listWebhookSubscriptions(auth.data!.actor.workspaceId), error: null }); }
+export async function POST(req: Request) { const auth = await requirePlatformAccess(req, { permission: "content.entry.publish" }); if (auth.error) return auth.error; try { const body = await req.json(); return NextResponse.json({ success: true, data: await createWebhookSubscription({ workspaceId: auth.data!.actor.workspaceId, actorId: auth.data!.actor.adminUserId, name: body.name, endpointUrl: body.endpointUrl, eventFilters: body.eventFilters ?? [] }), error: null }, { status: 201 }); } catch (error) { return NextResponse.json({ success: false, data: null, error: error instanceof Error ? error.message : "Could not create webhook" }, { status: 400 }); } }

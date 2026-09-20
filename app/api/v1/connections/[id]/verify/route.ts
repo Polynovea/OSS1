@@ -1,0 +1,5 @@
+import { requireDeveloperApi } from "@/lib/developer/apiAuth";
+import { apiError, apiSuccess } from "@/lib/developer/apiContract";
+import { verifyConnection } from "@/lib/infrastructure/connectionService";
+import { logDeveloperApiMutation } from "@/lib/developer/developerAudit";
+export async function POST(req:Request,{params}:{params:Promise<{id:string}>}){const auth=await requireDeveloperApi(req,{scope:"connection.write",requireActor:true});if(auth.error)return auth.error;const {id}=await params;try{const result=await verifyConnection({workspaceId:auth.data!.workspaceId,actorId:auth.data!.actorAdminUserId!,connectionId:id});await logDeveloperApiMutation(auth.data!,"developer.connection.verified","workspace_connection",id,{status:(result as any)?.status});return apiSuccess(result,{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});}catch(error:any){return apiError("CONNECTION_VERIFY_FAILED",error instanceof Error?error.message:"Could not verify connection",Number(error?.status)||400,{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});}}

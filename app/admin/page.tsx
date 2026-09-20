@@ -1,0 +1,6 @@
+"use client";
+import Link from "next/link";
+import { LayoutGrid, Diamond } from "lucide-react";
+import { hasSurfaceAccess } from "@/lib/admin/access";
+import { useAdminAccess } from "@/lib/admin/useAdminAccess";
+export default function AdminGateway() { const { profile } = useAdminAccess(); const enabled = hasSurfaceAccess(profile, "cms"); return <main className="flex min-h-screen items-center justify-center bg-background p-6 text-on-surface"><div className="w-full max-w-xl rounded-3xl border border-action/20 bg-surface-1 p-10 text-center shadow-2xl"><Diamond className="mx-auto text-action" size={28} /><p className="mt-5 text-[10px] font-bold uppercase tracking-[0.24em] text-action">Polynovea</p><h1 className="mt-3 font-headline text-4xl font-extrabold">CMS WORKSPACE</h1><p className="mx-auto mt-3 max-w-md text-sm leading-6 text-fg-muted">A governed workspace for content models, entries, media, releases, publishing, and operational content health.</p>{enabled ? <Link href="/admin/cms" className="mt-7 inline-flex items-center gap-2 rounded-lg ui-btn ui-btn-primary no-underline"><LayoutGrid size={15} /> Open CMS</Link> : <p className="mt-7 text-sm text-fg-muted">No CMS access is assigned to this account.</p>}</div></main>; }

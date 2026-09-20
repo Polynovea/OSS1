@@ -1,0 +1,55 @@
+name: Release readiness
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semver version to tag after CI passes
+        required: true
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: node node_modules/typescript/bin/tsc --noEmit
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm run sdk:build
+      - run: npm run cms -- --help
+      - run: npm run bootstrap:admin -- --help
+      - run: git diff --check
+      - run: npm audit --omit=dev
+      - name: Scan full Git history for secrets
+        uses: gitleaks/gitleaks-action@v2
+      - name: Validate release version
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Releases must be dispatched from main, not $GITHUB_REF" >&2
+            exit 1
+          fi
+          if ! [[ "$RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+            echo "Version must be strict SemVer (for example 1.2.3 or 1.2.3-rc.1)" >&2
+            exit 1
+          fi
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$RELEASE_VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "Release version $RELEASE_VERSION does not match package.json version $PACKAGE_VERSION" >&2
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$RELEASE_VERSION" >/dev/null; then
+            echo "Tag v$RELEASE_VERSION already exists" >&2
+            exit 1
+          fi
+      - name: Create and push annotated tag
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          git tag --annotate "v$RELEASE_VERSION" --message "Release v$RELEASE_VERSION"
+          git push origin "refs/tags/v$RELEASE_VERSION"

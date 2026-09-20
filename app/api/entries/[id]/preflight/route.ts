@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { requirePlatformAccess } from "@/lib/platform/permissions";
+import { runEntryPreflight } from "@/lib/content/preflightService";
+import { canActorOperateEntry } from "@/lib/schema/modelAccess";
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) { const auth = await requirePlatformAccess(req, { permission: "content.entry.read" }); if (auth.error) return auth.error; const { id } = await params; const access = await canActorOperateEntry(auth.data!.actor, id, "read"); if (!access.allowed) return NextResponse.json({ success: false, data: null, error: access.error, timestamp: new Date().toISOString() }, { status: access.status }); const report = await runEntryPreflight(auth.data!.actor.workspaceId, id); return report ? NextResponse.json({ success: true, data: report, error: null, timestamp: new Date().toISOString() }) : NextResponse.json({ success: false, data: null, error: "Entry or current draft not found", timestamp: new Date().toISOString() }, { status: 404 }); }

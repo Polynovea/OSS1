@@ -1,0 +1,74 @@
+{
+  "name": "polynovea-admin",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Polynovea/OSS1.git"
+  },
+  "homepage": "https://github.com/Polynovea/OSS1#readme",
+  "bugs": {
+    "url": "https://github.com/Polynovea/OSS1/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "worker:delivery": "node scripts/delivery-worker.mjs",
+    "certify:phase8": "node scripts/certify-phase8.mjs && node scripts/certify-phase8-authenticated-api.mjs",
+    "certify:phase9": "node scripts/certify-phase9.mjs && node scripts/certify-phase9-authenticated-api.mjs",
+    "certify:phase10": "node scripts/certify-phase10-foundation.mjs && node scripts/certify-phase10.mjs && node scripts/certify-phase10-authenticated-api.mjs",
+    "certify:phase11": "node scripts/certify-phase11-foundation.mjs && node scripts/certify-phase11.mjs && node scripts/certify-phase11-authenticated-api.mjs",
+    "certify:phases8-11": "npm run certify:phase8 && npm run certify:phase9 && npm run certify:phase10 && npm run certify:phase11",
+    "certify:phase13": "node --experimental-strip-types --loader ./scripts/phase12_75-node-loader.mjs scripts/certify-phase13-foundation.mjs && node --experimental-strip-types --loader ./scripts/phase12_75-node-loader.mjs scripts/certify-phase13-extensions.mjs",
+    "bootstrap:admin": "node scripts/bootstrap-admin.mjs",
+    "db:migrate": "node scripts/run-migrations.mjs --all",
+    "cms": "node scripts/polynovea-cms.mjs",
+    "sdk:build": "npm --prefix packages/cms-sdk run build",
+    "cms:help": "node scripts/polynovea-cms.mjs --help"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1115.0",
+    "@aws-sdk/s3-request-presigner": "^3.1115.0",
+    "@google-analytics/data": "^7.0.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "@tailwindcss/postcss": "^4.3.0",
+    "cheerio": "^1.2.0",
+    "lucide-react": "^1.16.0",
+    "mammoth": "^1.12.1",
+    "marked": "^18.0.10",
+    "next": "^15.5.24",
+    "pg": "^8.23.0",
+    "postcss": "8.5.28",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^3.8.1",
+    "tailwindcss": "^4.3.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.23",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "postcss": "8.5.28",
+    "sharp": "0.35.4"
+  },
+  "bin": {
+    "polynovea-cms": "scripts/polynovea-cms.mjs"
+  }
+}

@@ -1,0 +1,7 @@
+import { NextResponse } from "next/server";
+import { requirePlatformAccess } from "@/lib/platform/permissions";
+import { getWebQualityPolicy, saveWebQualityPolicy } from "@/lib/content/webQualityService";
+
+const respond=(success:boolean,data:unknown,error:string|null,status=200)=>NextResponse.json({success,data,error,timestamp:new Date().toISOString()},{status});
+export async function GET(req:Request){const auth=await requirePlatformAccess(req,{permission:"content.entry.read"});if(auth.error)return auth.error;try{return respond(true,await getWebQualityPolicy(auth.data!.actor.workspaceId),null);}catch(e){return respond(false,null,e instanceof Error?e.message:"Could not load Web Quality policy",500);}}
+export async function PUT(req:Request){const auth=await requirePlatformAccess(req,{permission:"workspace.manage"});if(auth.error)return auth.error;try{const b=await req.json();const data=await saveWebQualityPolicy({workspaceId:auth.data!.actor.workspaceId,actorId:auth.data!.actor.adminUserId,siteBaseUrl:b.siteBaseUrl,siteName:b.siteName,titleSuffix:b.titleSuffix,robotsEnabled:b.robotsEnabled,sitemapEnabled:b.sitemapEnabled,requireCanonicalRoute:b.requireCanonicalRoute,requireSocialCard:b.requireSocialCard,requireSchemaOrg:b.requireSchemaOrg,aiCrawlerPolicy:b.aiCrawlerPolicy,mediaBudget:b.mediaBudget,settings:b.settings});return respond(true,data,null);}catch(e){return respond(false,null,e instanceof Error?e.message:"Could not save Web Quality policy",400);}}

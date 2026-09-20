@@ -1,0 +1,32 @@
+import { requireDeveloperApi } from "@/lib/developer/apiAuth";
+import { apiError, apiSuccess } from "@/lib/developer/apiContract";
+import { listOperabilityOverview, runSystemDoctor, ensureEnvironmentComponents, runProvisioning, createWorkspaceBackup, restoreBackup, portabilityCheck, planUpgrade, executeUpgrade, runComponentAction, bindWebsiteConnection, queueWebsiteTest, requestInfrastructureApproval, reviewInfrastructureApproval, planEnvironmentSchema, applyEnvironmentSchema } from "@/lib/infrastructure/operabilityService";
+import { listEnvironments } from "@/lib/infrastructure/environmentService";
+import type { DeveloperApiScope } from "@/lib/developer/apiTokenService";
+import { logDeveloperApiMutation } from "@/lib/developer/developerAudit";
+
+const mutationScope=(operation:string):DeveloperApiScope|DeveloperApiScope[]=>{
+  if(operation==="schema_plan")return ["infrastructure.read","schema.read"];
+  if(operation==="schema_apply")return ["infrastructure.write","schema.write"];
+  return operation==="doctor"||operation==="portability"?["infrastructure.read"]:["infrastructure.write"];
+};
+export async function GET(req:Request){const auth=await requireDeveloperApi(req,{scope:"infrastructure.read"});if(auth.error)return auth.error;try{const url=new URL(req.url),environmentId=url.searchParams.get("environmentId")||undefined;const [environments,overview]=await Promise.all([listEnvironments(auth.data!.workspaceId),listOperabilityOverview(auth.data!.workspaceId,environmentId)]);return apiSuccess({environments,overview},{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});}catch(error){return apiError("INFRASTRUCTURE_READ_FAILED",error instanceof Error?error.message:"Could not read infrastructure state",500,{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});}}
+export async function POST(req:Request){let body:any;try{body=await req.json();}catch{return apiError("INVALID_REQUEST","Request body must be JSON",400);}const operation=String(body.operation||"");const auth=await requireDeveloperApi(req,{scope:mutationScope(operation),requireActor:!['doctor','portability','schema_plan'].includes(operation)});if(auth.error)return auth.error;const workspaceId=auth.data!.workspaceId,actorId=auth.data!.actorAdminUserId;try{let result:unknown;
+  if(operation==="doctor"){if(!actorId)return apiError("ACTOR_REQUIRED","System Doctor requires an audited token creator",409,{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});result=await runSystemDoctor({workspaceId,environmentId:String(body.environmentId),actorId});}
+  else if(operation==="components")result=await ensureEnvironmentComponents(workspaceId,String(body.environmentId));
+  else if(operation==="component_action")result=await runComponentAction({workspaceId,environmentId:String(body.environmentId),actorId:actorId!,componentId:String(body.componentId),operation:body.componentOperation||"check",approvalRequestId:body.approvalRequestId||null});
+  else if(operation==="provision")result=await runProvisioning({workspaceId,environmentId:String(body.environmentId),actorId:actorId!,providerKind:body.providerKind,operation:body.provisionOperation||"preflight",approvalRequestId:body.approvalRequestId||null});
+  else if(operation==="backup")result=await createWorkspaceBackup({workspaceId,environmentId:String(body.environmentId),actorId:actorId!});
+  else if(operation==="restore")result=await restoreBackup({workspaceId,environmentId:String(body.environmentId),backupId:String(body.backupId),actorId:actorId!,dryRun:Boolean(body.dryRun),approvalRequestId:body.approvalRequestId||null});
+  else if(operation==="portability")result=await portabilityCheck(workspaceId,String(body.environmentId));
+  else if(operation==="upgrade_plan")result=await planUpgrade({workspaceId,environmentId:String(body.environmentId),actorId:actorId!,targetAppVersion:body.targetAppVersion||null,targetMigration:body.targetMigration||null});
+  else if(operation==="upgrade_execute")result=await executeUpgrade({workspaceId,environmentId:String(body.environmentId),actorId:actorId!,upgradeRunId:String(body.upgradeRunId),backupId:body.backupId||null,approvalRequestId:body.approvalRequestId||null});
+  else if(operation==="website_bind")result=await bindWebsiteConnection({workspaceId,environmentId:String(body.environmentId),connectionId:String(body.connectionId),actorId:actorId!,integrationMethod:body.integrationMethod,modelApiKeys:Array.isArray(body.modelApiKeys)?body.modelApiKeys:[],routeMapping:body.routeMapping??{}});
+  else if(operation==="website_test")result=await queueWebsiteTest({workspaceId,bindingId:String(body.bindingId),actorId:actorId!});
+  else if(operation==="approval_request")result=await requestInfrastructureApproval({workspaceId,environmentId:body.environmentId||null,actorId:actorId!,operation:String(body.approvalOperation),entityType:String(body.entityType),entityId:String(body.entityId),reason:String(body.reason||""),request:body.request??{}});
+  else if(operation==="approval_review")result=await reviewInfrastructureApproval({workspaceId,actorId:actorId!,requestId:String(body.requestId),decision:body.decision,note:body.note||null});
+  else if(operation==="schema_plan")result=await planEnvironmentSchema({workspaceId,environmentId:String(body.environmentId),modelId:String(body.modelId),proposedSchema:body.schema,actorId:actorId??undefined});
+  else if(operation==="schema_apply")result=await applyEnvironmentSchema({workspaceId,environmentId:String(body.environmentId),modelId:String(body.modelId),proposedSchema:body.schema,actorId:actorId!,changeSummary:body.changeSummary||undefined,acknowledgeUnsafe:Boolean(body.acknowledgeUnsafe),approvalRequestId:body.approvalRequestId||null});
+  else return apiError("UNSUPPORTED_OPERATION","Unsupported infrastructure operation",400,{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});
+  if(actorId&&!['doctor','portability','schema_plan'].includes(operation))await logDeveloperApiMutation(auth.data!,`developer.infrastructure.${operation}`,"workspace_environment",String(body.environmentId||body.bindingId||body.requestId||"workspace"),{operation});return apiSuccess(result,{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});
+}catch(error:any){return apiError("INFRASTRUCTURE_OPERATION_FAILED",error instanceof Error?error.message:"Infrastructure operation failed",Number(error?.status)||400,{requestId:auth.data!.requestId,rateLimit:auth.data!.rateLimit});}}

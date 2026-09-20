@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { requirePlatformAccess } from "@/lib/platform/permissions";
+import { createPublicationTarget, listPublicationTargets } from "@/lib/content/publicationService";
+export async function GET(req: Request) { const auth = await requirePlatformAccess(req, { permission: "content.entry.read" }); if (auth.error) return auth.error; return NextResponse.json({ success: true, data: await listPublicationTargets(auth.data!.actor.workspaceId), error: null }); }
+export async function POST(req: Request) { const auth = await requirePlatformAccess(req, { permission: "content.entry.publish" }); if (auth.error) return auth.error; try { const body = await req.json(); return NextResponse.json({ success: true, data: await createPublicationTarget({ workspaceId: auth.data!.actor.workspaceId, actorId: auth.data!.actor.adminUserId, name: body.name, targetType: body.targetType, config: body.config }), error: null }, { status: 201 }); } catch (error) { return NextResponse.json({ success: false, data: null, error: error instanceof Error ? error.message : "Could not create target" }, { status: 400 }); } }

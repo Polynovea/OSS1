@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { requirePlatformAccess } from "@/lib/platform/permissions";
+import { getDependencies } from "@/lib/content/impactGraphService";
+import { canActorOperateEntry } from "@/lib/schema/modelAccess";
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) { const auth = await requirePlatformAccess(req, { permission: "content.entry.read" }); if (auth.error) return auth.error; const { id } = await params; const access = await canActorOperateEntry(auth.data!.actor, id, "read"); if (!access.allowed) return NextResponse.json({ success: false, data: null, error: access.error, timestamp: new Date().toISOString() }, { status: access.status }); const data = await getDependencies(auth.data!.actor.workspaceId, id); return data ? NextResponse.json({ success: true, data, error: null, timestamp: new Date().toISOString() }) : NextResponse.json({ success: false, data: null, error: "Entry not found", timestamp: new Date().toISOString() }, { status: 404 }); }

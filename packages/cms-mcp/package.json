@@ -1,0 +1,15 @@
+{
+  "name": "@polynovea/cms-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Polynovea/OSS1.git",
+    "directory": "packages/cms-mcp"
+  },
+  "type": "module",
+  "description": "Governed MCP stdio client for Polynovea CMS v1 APIs.",
+  "bin": { "polynovea-cms-mcp": "bin/polynovea-cms-mcp.mjs" },
+  "engines": { "node": ">=20" }
+}

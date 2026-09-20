@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { requirePlatformAccess } from "@/lib/platform/permissions";
+import { createReleasePreviewToken } from "@/lib/content/previewService";
+
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) { const auth = await requirePlatformAccess(req, { permission: "content.entry.read" }); if (auth.error) return auth.error; try { const { id } = await params; const body = await req.json().catch(() => ({})); const result = await createReleasePreviewToken({ workspaceId: auth.data!.actor.workspaceId, releaseId: id, actorId: auth.data!.actor.adminUserId, expiresInHours: body.expiresInHours }); return NextResponse.json({ success: true, data: { url: `/preview/${result.token}`, expiresAt: result.expiresAt }, error: null, timestamp: new Date().toISOString() }, { status: 201 }); } catch (error) { return NextResponse.json({ success: false, data: null, error: error instanceof Error ? error.message : "Could not create preview", timestamp: new Date().toISOString() }, { status: 400 }); } }

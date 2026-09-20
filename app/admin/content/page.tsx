@@ -1,0 +1,3 @@
+"use client";
+import Link from "next/link";
+export default function RetiredContentPage() { return <section className="rounded-2xl border border-action/20 bg-surface-1 p-10 text-center"><p className="text-[10px] font-bold uppercase tracking-[0.22em] text-action">Retired product</p><h1 className="mt-3 font-headline text-3xl font-extrabold">CONTENT TRACKING IS NO LONGER AVAILABLE</h1><p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-fg-muted">The discontinued Corporate &amp; Ventures surface has been removed. Use the CMS workspace for content operations.</p><Link href="/admin/cms" className="mt-6 inline-flex rounded-lg ui-btn ui-btn-primary no-underline">Open CMS</Link></section>; }
