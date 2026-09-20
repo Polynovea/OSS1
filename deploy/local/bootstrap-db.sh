@@ -13,8 +13,6 @@ GRANT anon, authenticated, service_role TO authenticator;
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 SQL
 
-for file in /docker-entrypoint-initdb.d/migrations/[0-9][0-9][0-9][0-9]_*.sql; do
-  [ -f "$file" ] || continue
-  echo "Applying Polynovea CMS migration: $file"
-  psql -v ON_ERROR_STOP=1 --username postgres --dbname postgres --file "$file"
-done
+# Supabase's earlier migrate.sh has already applied every ordered SQL file in
+# /docker-entrypoint-initdb.d/migrations. Replaying those files here breaks the
+# migrations that intentionally create non-idempotent constraints and policies.
