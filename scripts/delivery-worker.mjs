@@ -482,7 +482,12 @@ async function dispatchAnalyticsSync(client,job){
   }
 }
 
-const client = new pg.Client({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } });
+const databaseHost = new URL(DATABASE_URL).hostname.toLowerCase();
+const localDatabase = databaseHost === "localhost" || databaseHost === "127.0.0.1" || databaseHost === "db";
+const client = new pg.Client({
+  connectionString: DATABASE_URL,
+  ssl: localDatabase ? undefined : { rejectUnauthorized: false },
+});
 await client.connect();
 console.log(`[delivery-worker] started ${workerId}; adapters=${SUPPORTED_KINDS.join(",")}; queues=${SUPPORTED_QUEUES.join(",")}`);
 let lastMaintenanceSeed = 0;
