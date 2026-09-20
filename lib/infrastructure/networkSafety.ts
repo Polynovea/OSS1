@@ -20,7 +20,8 @@ export async function assertSafeOutboundUrl(raw: string, environmentKind: Enviro
   const localAllowed = environmentKind === "local" && options.allowHttpLocal === true;
   if (url.username || url.password) throw new Error("Credentials must not be embedded in connection URLs");
   if (url.protocol !== "https:" && !(localAllowed && url.protocol === "http:")) throw new Error(localAllowed ? "Connection URL must use HTTPS or local HTTP" : "Connection URL must use HTTPS");
-  const host=url.hostname.toLowerCase();
+  // Node URL implementations may retain brackets around IPv6 literals.
+  const host=url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   const explicitLocal=host==="localhost" || host.endsWith(".localhost") || host.endsWith(".local");
   if (explicitLocal && !localAllowed) throw new Error("Loopback/private destinations are allowed only for Local environments");
   if (explicitLocal) return url;

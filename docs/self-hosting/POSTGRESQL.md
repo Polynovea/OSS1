@@ -13,7 +13,7 @@ Supported components:
 | Database | PostgreSQL 15+ in a Supabase-compatible stack |
 | Data API | PostgREST-compatible endpoint |
 | Authentication | GoTrue-compatible Supabase Auth |
-| Application | Node.js 20+ Next.js server |
+| Application | Node.js 22+ Next.js server |
 | Jobs | Persistent `npm run worker:delivery` process |
 | Media | Optional S3-compatible storage; R2 is the supplied reference adapter |
 
@@ -23,7 +23,7 @@ Docker/Compose is **optional packaging only**. The CMS does not require Docker a
 
 ## Installation
 
-1. Install Node.js 20+.
+1. Install Node.js 22+.
 2. Provision the supported Supabase-compatible backend.
 3. Copy `.env.example` to `.env.local`.
 4. Configure `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` and `CMS_CONFIG_ENCRYPTION_KEY`.

@@ -6,7 +6,7 @@ Polynovea CMS is an open-source, workspace-scoped content and data operations pl
 
 The supported OSS V1 application profile is:
 
-- Node.js 20+
+- Node.js 22+
 - PostgreSQL 15+
 - PostgREST-compatible data API
 - GoTrue-compatible Supabase Auth
@@ -45,7 +45,7 @@ On macOS/Linux, use `export POLYNOVEA_LOCAL_RUNTIME_CONTROL=1`. Pass `--no-demo`
 
 ### 1. Prerequisites
 
-Install Node.js 20+ and provision a supported Supabase-compatible backend. For the simplest path, create a Supabase project with PostgreSQL 15+ and enable `pg_trgm`.
+Install Node.js 22+ and provision a supported Supabase-compatible backend. For the simplest path, create a Supabase project with PostgreSQL 15+ and enable `pg_trgm`.
 
 ### 2. Install dependencies
 

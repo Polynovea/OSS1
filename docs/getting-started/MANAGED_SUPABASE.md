@@ -69,6 +69,6 @@ npm test
 npm run build
 ```
 
-Deploy the Next.js output to a Node.js 20+ host with the same environment values. Run `npm run worker` as a separate long-lived process using the same server-side configuration. Terminate TLS at the platform or reverse proxy, configure backups and log retention, and rotate bootstrap credentials after first sign-in.
+Deploy the Next.js output to a Node.js 22+ host with the same environment values. Run `npm run worker` as a separate long-lived process using the same server-side configuration. Terminate TLS at the platform or reverse proxy, configure backups and log retention, and rotate bootstrap credentials after first sign-in.
 
 For upgrades, back up the database, deploy the new application build, apply the repository's pending migrations, and verify the health and login paths before directing production traffic to the new release.

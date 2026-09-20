@@ -4,7 +4,7 @@ This path evaluates and develops Polynovea CMS without cloud accounts.
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 22 or newer
 - Docker Desktop, or Docker Engine with the Compose plugin
 - ports `3210` and `54321` available
 
