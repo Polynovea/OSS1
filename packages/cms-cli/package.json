@@ -1,16 +1,16 @@
 {
   "name": "@polynovea/cms-cli",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
   "type": "module",
   "private": false,
   "license": "MIT",
-  "engines": { "node": ">=20" },
+  "engines": { "node": ">=22" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Polynovea/OSS1.git",
     "directory": "packages/cms-cli"
   },
-  "description": "CLI for the stable Polynovea CMS Developer API",
+  "description": "CLI for the Polynovea CMS Developer API",
   "bin": {
     "polynovea-cms": "./bin/polynovea-cms.mjs"
   },

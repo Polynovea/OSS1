@@ -71,6 +71,12 @@ Development:
 npm run dev
 ```
 
+With the application running, optionally create a starter Article model and welcome draft:
+
+```bash
+npm run seed:starter
+```
+
 Production-style local run:
 
 ```bash

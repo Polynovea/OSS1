@@ -17,7 +17,13 @@ export function getSupabaseBrowserConfig(
   return url && anonKey ? { url, anonKey } : null;
 }
 
-const browserConfig = getSupabaseBrowserConfig();
+// Next.js replaces explicitly referenced NEXT_PUBLIC_* expressions in browser
+// bundles. Passing the process.env object through the helper leaves these
+// values undefined in an optimized client build.
+const browserConfig = getSupabaseBrowserConfig({
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+});
 const supabaseUrl = browserConfig?.url || "";
 const supabaseAnonKey = browserConfig?.anonKey || "";
 

@@ -1,16 +1,16 @@
 {
   "name": "@polynovea/cms-sdk",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
   "type": "module",
   "private": false,
   "license": "MIT",
-  "engines": { "node": ">=20" },
+  "engines": { "node": ">=22" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Polynovea/OSS1.git",
     "directory": "packages/cms-sdk"
   },
-  "description": "TypeScript SDK for the stable Polynovea CMS Developer API",
+  "description": "TypeScript SDK for the Polynovea CMS Developer API",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

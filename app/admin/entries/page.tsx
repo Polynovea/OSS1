@@ -21,9 +21,9 @@ interface SavedView { id: string; name: string; filters_json: { modelId?: string
 const STATUSES = ["draft", "in_review", "approved", "scheduled", "published", "archived"] as const;
 const PAGE_SIZE = 25;
 
-function modelName(doc: SearchDoc): string {
+function modelName(doc: SearchDoc, models: Model[]): string {
   const rel = doc.content_models;
-  return (Array.isArray(rel) ? rel[0]?.name : rel?.name) || "Unknown model";
+  return (Array.isArray(rel) ? rel[0]?.name : rel?.name) || models.find((model) => model.id === doc.content_model_id)?.name || "Unknown model";
 }
 
 export default function EntriesPage() {
@@ -292,7 +292,7 @@ export default function EntriesPage() {
                 <div key={doc.entry_id} className="grid min-w-[760px] grid-cols-[28px_minmax(0,1fr)_140px_130px_140px] items-center gap-4 border-b border-subtle px-3 py-3 last:border-0 hover:bg-surface-2">
                   <input type="checkbox" checked={selected.has(doc.entry_id)} onChange={() => toggle(doc.entry_id)} className="accent-primary" />
                   <Link href={`/admin/entries/${doc.entry_id}`} className="block truncate no-underline"><span className="block font-mono text-xs text-action">{doc.entry_id.slice(0, 8)}</span><span className="mt-1 block truncate text-sm text-fg-secondary">{doc.search_text?.slice(0, 80) || "(no preview text)"}</span></Link>
-                  <span className="truncate text-sm text-fg-secondary">{modelName(doc)}</span>
+                  <span className="truncate text-sm text-fg-secondary">{modelName(doc, models)}</span>
                   <span className={doc.status === "published" ? "text-xs font-bold text-success" : doc.status === "archived" ? "text-xs font-bold text-fg-muted" : "text-xs font-bold text-warning"}>{doc.status}</span>
                   <span className="text-xs text-fg-muted">{new Date(doc.updated_at).toLocaleDateString()}</span>
                 </div>

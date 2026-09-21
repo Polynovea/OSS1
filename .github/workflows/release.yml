@@ -22,6 +22,7 @@ jobs:
       - run: npm run sdk:build
       - run: npm run cms -- --help
       - run: npm run bootstrap:admin -- --help
+      - run: npm run seed:starter -- --help
       - run: git diff --check
       - run: npm audit --omit=dev
       - name: Scan full Git history for secrets

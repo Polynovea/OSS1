@@ -57,6 +57,16 @@ Remove-Item Env:POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD
 
 The command creates a confirmed auth identity when one does not exist, then creates or repairs the auditable CMS owner profile and default-workspace membership.
 
+## Create starter content
+
+After starting the application, create an idempotent starter Article model and welcome draft through the authenticated CMS API:
+
+```bash
+npm run seed:starter
+```
+
+The command uses the bootstrap owner defaults from `.env.local`. You can instead pass `--email`, `--password` and `--url` explicitly. Re-running it reuses the existing starter model and entry.
+
 ## Run the application
 
 In one terminal:

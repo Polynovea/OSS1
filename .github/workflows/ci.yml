@@ -14,6 +14,7 @@ jobs:
       - run: npm run build
       - run: npm run sdk:build
       - run: npm run cms -- --help
+      - run: npm run seed:starter -- --help
       - run: npm ci --prefix examples/nextjs-site
       - run: npm run typecheck --prefix examples/nextjs-site
       - run: npm run build --prefix examples/nextjs-site

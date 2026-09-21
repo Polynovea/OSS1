@@ -1,6 +1,6 @@
 {
   "name": "polynovea-admin",
-  "version": "1.0.0",
+  "version": "0.1.0-alpha.1",
   "type": "module",
   "private": true,
   "license": "MIT",
@@ -35,6 +35,7 @@
     "certify:phase13": "node --experimental-strip-types --loader ./scripts/phase12_75-node-loader.mjs scripts/certify-phase13-foundation.mjs && node --experimental-strip-types --loader ./scripts/phase12_75-node-loader.mjs scripts/certify-phase13-extensions.mjs",
     "certify:live": "npm run certify:phases8-11 && npm run certify:phase12 && npm run certify:phase12.5 && npm run certify:phase12.75 && npm run certify:phase13",
     "bootstrap:admin": "node scripts/bootstrap-admin.mjs",
+    "seed:starter": "node scripts/seed-starter.mjs",
     "db:migrate": "node scripts/run-migrations.mjs --all",
     "cms": "node scripts/polynovea-cms.mjs",
     "sdk:build": "npm --prefix packages/cms-sdk run build",

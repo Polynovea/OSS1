@@ -1,6 +1,6 @@
 {
   "name": "@polynovea/cms-mcp",
-  "version": "1.0.0",
+  "version": "0.1.0-alpha.1",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -9,7 +9,7 @@
     "directory": "packages/cms-mcp"
   },
   "type": "module",
-  "description": "Governed MCP stdio client for Polynovea CMS v1 APIs.",
+  "description": "Governed MCP stdio client for Polynovea CMS APIs.",
   "bin": { "polynovea-cms-mcp": "bin/polynovea-cms-mcp.mjs" },
-  "engines": { "node": ">=20" }
+  "engines": { "node": ">=22" }
 }

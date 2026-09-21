@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.1 — 2026-09-21
 
 - Removed the identity-specific master-account runtime bypass; every administrator now requires an auditable profile, workspace membership and role assignment.
 - Added a server-only `bootstrap:admin` command and migration `0064` to retire the legacy client bootstrap policies safely.
@@ -14,6 +14,7 @@
 - Expanded README, self-hosting, contribution and security documentation; direct generic PostgreSQL runtime support is explicitly deferred.
 - CI/release gates now include the production build, SDK build, CLI smoke test and `git diff --check` in addition to type-check, lint, tests, audit and secret scanning.
 - Added `npm run certify:live` and recorded a clean managed-Supabase install, owner bootstrap, authenticated Phases 8–13, worker execution, production restart and idempotent migration reconciliation.
+- Added the idempotent `npm run seed:starter` onboarding command for a first Article model and welcome draft.
 
 ## Release status
 
