@@ -15,6 +15,8 @@ The supported OSS V1 application profile is:
 
 The application service and browser-authentication layers currently use Supabase/PostgREST semantics. A bare PostgreSQL server by itself is therefore **not** a supported application runtime yet. Vercel + Supabase is the reference deployment profile, but any Node host can run the Next.js application when connected to a supported Supabase-compatible backend.
 
+> **Alpha release note:** Polynovea does not currently operate an official hosted OSS demo. This repository is a self-hosted release; use a disposable Supabase project for evaluation and follow the quickstart below.
+
 See [PostgreSQL and self-hosting](docs/self-hosting/POSTGRESQL.md) for the exact portability boundary.
 
 ## Quick start
