@@ -35,6 +35,8 @@ npm audit --omit=dev
 
 Authenticated certification scripts require a configured supported runtime and should use isolated/disposable fixtures. The default `npm test` run does not load `.env.local` and skips the database-provisioning certification when `DATABASE_URL` is absent. To run that certification explicitly, export `DATABASE_URL` for a PostgreSQL role that can create and drop a disposable database, then run `npx vitest run lib/infrastructure/databaseProvisioning.test.ts`.
 
+For a disposable fully configured Supabase project, start the application with `npm run dev` in one terminal and run `npm run certify:live` in another. The suite exercises authenticated database, HTTP, SDK, CLI, worker, operational-intelligence, MCP and extension boundaries and requires zero leaked certification fixtures.
+
 ## Change discipline
 
 - Keep unrelated changes out of the pull request.

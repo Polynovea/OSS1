@@ -13,6 +13,7 @@
 - Delivery Operations UI now lists every worker job kind, and publication delivery resolves its configured signing secret correctly.
 - Expanded README, self-hosting, contribution and security documentation; direct generic PostgreSQL runtime support is explicitly deferred.
 - CI/release gates now include the production build, SDK build, CLI smoke test and `git diff --check` in addition to type-check, lint, tests, audit and secret scanning.
+- Added `npm run certify:live` and recorded a clean managed-Supabase install, owner bootstrap, authenticated Phases 8–13, worker execution, production restart and idempotent migration reconciliation.
 
 ## Release status
 

@@ -126,6 +126,16 @@ npm audit --omit=dev
 
 Authenticated live certification additionally requires a configured supported runtime.
 
+With the application running at `http://localhost:3000` and a disposable Supabase project configured in `.env.local`, run the complete authenticated database, HTTP, SDK, CLI, worker, operational-intelligence, MCP and extension suite with:
+
+```bash
+npm run certify:live
+```
+
+The live suite creates isolated certification workspaces and users and verifies their removal after each phase. Never point it at a project whose availability or data-retention policy does not permit disposable certification activity.
+
+The latest recorded clean-install run is [OSS acceptance record — 2026-09-21](docs/release/OSS_ACCEPTANCE_2026-09-21.md).
+
 The database-provisioning certification is intentionally skipped by the default hermetic test run. To exercise it, provide `DATABASE_URL` in the process environment and run:
 
 ```bash
