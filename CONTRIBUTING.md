@@ -6,7 +6,7 @@ Thank you for helping improve Polynovea CMS. Keep contributions focused, reviewa
 
 Prerequisites:
 
-- Node.js 20+
+- Node.js 22+
 - npm
 - a supported Supabase/PostgREST-compatible backend when exercising authenticated/database flows
 

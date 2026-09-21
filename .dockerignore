@@ -1,8 +1,0 @@
-node_modules
-.next
-.git
-.env
-.env.*
-*.log
-tsconfig.tsbuildinfo
-ui-ux-pro-max-skill
