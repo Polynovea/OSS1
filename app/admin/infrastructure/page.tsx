@@ -6,7 +6,6 @@ import {
   Archive,
   CheckCircle2,
   CircleAlert,
-  Database,
   ExternalLink,
   HardDrive,
   HeartPulse,
@@ -64,7 +63,7 @@ type Connection = { id: string; environment_id: string; connector_family: string
 type ProvisioningRun = { id: string; provider_kind: string; operation: string; status: string; created_at: string };
 type Overview = { doctorRuns: Doctor[]; provisioningRuns: ProvisioningRun[]; components: Component[]; backups: Backup[]; upgrades: Upgrade[]; approvals: Approval[]; websites: Website[] };
 
-type Tab = "setup" | "components" | "website" | "doctor" | "backup" | "upgrade" | "approvals" | "local";
+type Tab = "setup" | "components" | "website" | "doctor" | "backup" | "upgrade" | "approvals";
 
 async function authFetch(input: RequestInfo | URL, init: RequestInit = {}) {
   const auth = await getAuthHeaders();
@@ -98,7 +97,6 @@ const tabs: Array<{ key: Tab; label: string }> = [
   { key: "backup", label: "Backup & restore" },
   { key: "upgrade", label: "Upgrade" },
   { key: "approvals", label: "Approvals" },
-  { key: "local", label: "Local workspace" },
 ];
 
 export default function InfrastructurePage() {
@@ -110,9 +108,6 @@ export default function InfrastructurePage() {
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [localEnabled, setLocalEnabled] = useState(false);
-  const [localDir, setLocalDir] = useState("");
-  const [localBackupFile, setLocalBackupFile] = useState("");
   const [lastResult, setLastResult] = useState<any>(null);
 
   const current = useMemo(() => envs.find((environment) => environment.id === selected) ?? envs[0] ?? null, [envs, selected]);
@@ -126,7 +121,6 @@ export default function InfrastructurePage() {
       if (!infraResponse.ok) throw new Error(infraBody.error || "Could not load infrastructure");
       setEnvs(infraBody.data.environments ?? []);
       setOverview(infraBody.data.overview ?? {});
-      setLocalEnabled(Boolean(infraBody.data.localRuntimeControl));
       if (!selected && infraBody.data.environments?.[0]) setSelected(infraBody.data.environments[0].id);
       if (connectionResponse.ok) setConnections(connectionBody.data ?? []);
     } catch (cause) {
@@ -137,7 +131,7 @@ export default function InfrastructurePage() {
   useEffect(() => { void load(); }, [load]);
 
   async function op(operation: string, payload: Record<string, unknown> = {}) {
-    if (!current && !operation.startsWith("local_")) throw new Error("Create an environment first");
+    if (!current) throw new Error("Create an environment first");
     setBusy(operation);
     setError("");
     setNotice("");
@@ -146,7 +140,6 @@ export default function InfrastructurePage() {
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "Operation failed");
       setLastResult(body.data);
-      if (operation === "local_backup" && body.data?.file) setLocalBackupFile(String(body.data.file));
       setNotice(`${humanize(operation)} completed.`);
       await load();
       return body.data;
@@ -310,18 +303,6 @@ export default function InfrastructurePage() {
               </section>
             ) : null}
 
-            {tab === "local" ? (
-              <section className="ui-section border-0">
-                <div className="mb-5"><Database className="text-icon-secondary" size={20} /><h2 className="ui-section-title mt-3">Local Workspace</h2><p className="ui-section-description max-w-2xl">PostgreSQL semantics, Supabase-compatible Auth/REST boundary, CMS and durable worker. Runtime control remains disabled on hosted installations.</p></div>
-                <div className="rounded-2xl bg-surface-1 p-5">
-                  <Field label="Workspace directory" hint="Optional. Must remain inside the allowed local workspace boundary."><input value={localDir} onChange={(event) => setLocalDir(event.target.value)} placeholder="Local workspace folder" className="mt-2 w-full rounded-lg px-3 py-2.5 text-sm" /></Field>
-                  <div className="mt-4 flex flex-wrap gap-2">{["local_init", "local_start", "local_status", "local_backup", "local_upgrade", "local_stop"].map((action) => <button key={action} disabled={!localEnabled || Boolean(busy)} onClick={() => void op(action, { directory: localDir || null })} className="ui-btn ui-btn-secondary disabled:opacity-40">{humanize(action.replace("local_", ""))}</button>)}</div>
-                  <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]"><input value={localBackupFile} onChange={(event) => setLocalBackupFile(event.target.value)} placeholder="Local backup .sql file" className="rounded-lg px-3 py-2.5 text-sm" /><button disabled={!localEnabled || !localBackupFile || Boolean(busy)} onClick={() => void op("local_restore", { directory: localDir || null, backupFile: localBackupFile })} className="ui-btn ui-btn-secondary text-warning disabled:opacity-40">Restore local backup</button></div>
-                  {!localEnabled ? <div className="ui-alert ui-alert-warning mt-5">Local process control is disabled here. On a local installation, set <code>POLYNOVEA_LOCAL_RUNTIME_CONTROL=1</code>; hosted deployments cannot spawn Docker on a user's computer.</div> : null}
-                </div>
-                {lastResult ? <pre className="mt-5 max-h-80 overflow-auto rounded-xl bg-field p-4 text-[11px] text-fg-muted">{JSON.stringify(lastResult, null, 2)}</pre> : null}
-              </section>
-            ) : null}
           </main>
         </div>
       </div>

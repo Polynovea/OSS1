@@ -32,8 +32,6 @@
     "certify:phase13": "node --experimental-strip-types --loader ./scripts/phase12_75-node-loader.mjs scripts/certify-phase13-foundation.mjs && node --experimental-strip-types --loader ./scripts/phase12_75-node-loader.mjs scripts/certify-phase13-extensions.mjs",
     "bootstrap:admin": "node scripts/bootstrap-admin.mjs",
     "db:migrate": "node scripts/run-migrations.mjs --all",
-    "local:setup": "node scripts/setup-local.mjs",
-    "local:runtime": "node scripts/local-runtime.mjs",
     "cms": "node scripts/polynovea-cms.mjs",
     "sdk:build": "npm --prefix packages/cms-sdk run build",
     "cms:help": "node scripts/polynovea-cms.mjs --help"

@@ -41,9 +41,9 @@ export async function ensureEnvironmentComponents(workspaceId:string,environment
   const legacyR2=Boolean(process.env.R2_ACCESS_KEY_ID&&process.env.R2_SECRET_ACCESS_KEY&&(process.env.R2_ACCOUNT_ID||process.env.R2_S3_ENDPOINT));
   const runtimeProvider=env.runtime_provider??null;const edgeProvider=runtimeProvider&&/(supabase|edge|deno)/i.test(runtimeProvider)?runtimeProvider:null;
   const secretReady=Boolean(secretProvider&&secretProvider.status==="active"&&(secretProvider.provider_kind!=="encrypted_postgres"||process.env.CMS_CONFIG_ENCRYPTION_KEY));
-  const localRuntime=String(runtimeProvider||"").toLowerCase().includes("local");
+  const isLocalProvider=String(runtimeProvider||"").toLowerCase().includes("local");
   const providerByCapability:Record<string,string|null>={
-    postgres:databaseConnection?.connector_type??(localRuntime?"local-postgres":null),
+    postgres:databaseConnection?.connector_type??(isLocalProvider?"local-postgres":null),
     durable_worker:runtimeProvider??null,
     secret_store:secretReady?String(secretProvider?.provider_kind||"configured"):null,
     scheduled_execution:runtimeProvider??null,

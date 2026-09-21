@@ -15,33 +15,9 @@ The supported OSS V1 application profile is:
 
 The application service and browser-authentication layers currently use Supabase/PostgREST semantics. A bare PostgreSQL server by itself is therefore **not** a supported application runtime yet. Vercel + Supabase is the reference deployment profile, but any Node host can run the Next.js application when connected to a supported Supabase-compatible backend.
 
-Docker is **optional packaging only**. It is not required to install, develop, certify or deploy OSS V1.
-
 See [PostgreSQL and self-hosting](docs/self-hosting/POSTGRESQL.md) for the exact portability boundary.
 
-## Five-minute local evaluation
-
-The fastest evaluation path uses Docker Desktop or Docker Engine with Compose. It creates an isolated PostgreSQL, PostgREST, GoTrue, CMS and delivery-worker stack; creates the first owner; and seeds a demonstration content model and entry.
-
-```bash
-npm ci
-npm run local:setup -- --email=owner@example.com --password=change-me-now
-```
-
-Open `http://localhost:3210` and sign in with those credentials. Runtime data and generated secrets are stored under `.polynovea-local/`, which is ignored by Git. Use a strong, unique password outside disposable local evaluation.
-
-Useful lifecycle commands:
-
-```bash
-$env:POLYNOVEA_LOCAL_RUNTIME_CONTROL="1" # PowerShell
-npm run local:runtime -- status --directory=.polynovea-local
-npm run local:runtime -- backup --directory=.polynovea-local
-npm run local:runtime -- stop --directory=.polynovea-local
-```
-
-On macOS/Linux, use `export POLYNOVEA_LOCAL_RUNTIME_CONTROL=1`. Pass `--no-demo` to `local:setup` for an empty workspace. See the [complete local quickstart](docs/getting-started/LOCAL_QUICKSTART.md).
-
-## Managed Supabase quick start
+## Quick start
 
 ### 1. Prerequisites
 
@@ -112,10 +88,6 @@ npm run worker:delivery
 
 The worker requires `DATABASE_URL` and any credentials needed by the enabled adapters.
 
-## Local container profile
-
-`deploy/local/` and the local-runtime scripts provide a reproducible Supabase-compatible evaluation and development profile. Managed Supabase remains the reference production path; the container profile is intended for local evaluation, development, backup/restore exercises and contribution testing.
-
 ## Architecture and security
 
 Browser requests go through Next.js route handlers. Server routes resolve an authenticated CMS actor, enforce workspace membership and permissions, call the service layer and write audit evidence. The server-only service role may bypass database RLS; browser clients never receive it.
@@ -167,7 +139,7 @@ The configured PostgreSQL role must be allowed to create and drop the disposable
 - non-Supabase authentication is future portability work;
 - a direct generic-PostgreSQL application adapter is not certified for V1;
 - the R2 adapter is the first-class supplied media adapter; other S3-compatible providers may require configuration/adapter work;
-- the local Docker profile is intended for evaluation and development; production operators should use a supported managed or self-hosted Supabase-compatible deployment and an external worker process.
+- operators must provide a managed or independently operated Supabase-compatible backend and an external worker process.
 
 ## Headless delivery
 

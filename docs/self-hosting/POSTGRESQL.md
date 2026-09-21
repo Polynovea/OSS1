@@ -19,8 +19,6 @@ Supported components:
 
 A managed Supabase project is the simplest reference backend. Self-hosted Supabase-compatible infrastructure is also valid when it provides the same required API/auth semantics.
 
-Docker/Compose is **optional packaging only**. The CMS does not require Docker as an installation or release gate.
-
 ## Installation
 
 1. Install Node.js 22+.
@@ -36,10 +34,6 @@ Docker/Compose is **optional packaging only**. The CMS does not require Docker a
 11. Run `npm run worker:delivery` persistently when enabling durable delivery/processing features.
 
 The first-admin bootstrap is deliberately server-only. Browser clients cannot create their own `admin_users` records or promote themselves to `master`.
-
-## Optional packaged local profile
-
-`deploy/local/` and `scripts/local-runtime.mjs` remain available for operators who prefer a containerized Supabase-compatible local stack. They are convenience tooling, not the canonical V1 installation path and not a release blocker.
 
 ## Existing installations and upgrades
 

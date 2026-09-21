@@ -1,8 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import http from 'node:http';
-import os from 'node:os';
-import path from 'node:path';
-import { rm } from 'node:fs/promises';
 import {
   createPgClient,
   createDisposableWorkspace,
@@ -28,10 +25,6 @@ import {
   reviewInfrastructureApproval,
 } from '../lib/infrastructure/operabilityService';
 
-import {
-  initializeLocalRuntime,
-} from '../lib/infrastructure/localRuntime';
-
 import { createModel } from '../lib/schema/modelService';
 import { verifyConnection } from '../lib/infrastructure/connectionService';
 
@@ -40,7 +33,6 @@ let workspaceId: string = '';
 const authUserIds: string[] = [];
 const adminUserIds: string[] = [];
 let localServer: http.Server | null = null;
-let scratchRuntimeDir: string | null = null;
 
 const assert = (condition: any, message: string) => {
   if (!condition) {
@@ -558,51 +550,12 @@ try {
   assert(executedSafeUpgrade.status === 'succeeded', `Safe upgrade execution failed: ${executedSafeUpgrade.status}`);
   console.log('[PASS] Upgrade Manager planned upgrade, enforced backup, blocked unapproved review risk, executed safe upgrade.');
 
-  // -------------------------------------------------------------------------
-  // 10. Local Runtime Controls & Isolation (Deliverable E)
-  // -------------------------------------------------------------------------
-  console.log('\n--- 10. Local Runtime Controls & Isolation ---');
-  // With local runtime control disabled (default), initializeLocalRuntime must reject with 403
-  const origControl = process.env.POLYNOVEA_LOCAL_RUNTIME_CONTROL;
-  delete process.env.POLYNOVEA_LOCAL_RUNTIME_CONTROL;
-  await expectFailure(
-    'Local runtime initialization when control disabled',
-    () => initializeLocalRuntime(),
-    'local runtime control is disabled'
-  );
-
-  // Enable local runtime control and test path traversal / boundary protection
-  process.env.POLYNOVEA_LOCAL_RUNTIME_CONTROL = '1';
-  scratchRuntimeDir = path.join(os.tmpdir(), `polynovea-local-cert-${Date.now()}`);
-  process.env.POLYNOVEA_LOCAL_RUNTIME_ROOT = scratchRuntimeDir;
-
-  const targetDir = scratchRuntimeDir;
-  await expectFailure(
-    'Local runtime directory path traversal rejection',
-    () => initializeLocalRuntime(path.join(targetDir, '..', 'escaped')),
-    'must be inside'
-  );
-
-  // Valid local runtime initialization
-  const localConfig = await initializeLocalRuntime(path.join(targetDir, 'workspace'));
-  assert(localConfig.envFile && localConfig.appPort > 0 && localConfig.supabasePort > 0, 'Local runtime config incomplete');
-  console.log('[PASS] Local runtime control disabled by default; boundary check enforced; runtime config initialized safely.');
-
-  // Restore env
-  if (origControl) process.env.POLYNOVEA_LOCAL_RUNTIME_CONTROL = origControl;
-  else delete process.env.POLYNOVEA_LOCAL_RUNTIME_CONTROL;
-  delete process.env.POLYNOVEA_LOCAL_RUNTIME_ROOT;
-
   console.log('\nPHASE 12.5 FULL OPERABILITY CONTROL PLANE CERTIFICATION: ALL PASSED');
 } finally {
   console.log('\n--- Final Teardown & 0-Leak Verification ---');
   if (localServer) {
     await new Promise<void>((resolve) => localServer!.close(() => resolve())).catch(() => {});
   }
-  if (scratchRuntimeDir) {
-    await rm(scratchRuntimeDir, { recursive: true, force: true }).catch(() => {});
-  }
-
   // Teardown certification workspace and actors
   await teardownCertification({ client, workspaceId, authUserIds: authUserIds as any, adminUserIds: adminUserIds as any });
 

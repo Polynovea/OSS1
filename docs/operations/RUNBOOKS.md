@@ -25,9 +25,9 @@ These runbooks apply to the supported Supabase/PostgREST-compatible runtime. Rec
 
 ## Backup and restore
 
-1. For the packaged local runtime, use `node scripts/local-runtime.mjs backup --directory=<runtime-dir>`.
+1. Create a provider-native PostgreSQL backup or use `pg_dump` with an account scoped for backup operations.
 2. Store backups encrypted outside the application host and test restore into an isolated environment.
-3. Restore only through the guarded local-runtime command or approved environment workflow. Verify login, workspace access, migration level, worker health and a representative published item afterward.
+3. Restore through the provider's guarded workflow or an approved environment operation. Verify login, workspace access, migration level, worker health and a representative published item afterward.
 
 ## Credential rotation or degraded connection
 

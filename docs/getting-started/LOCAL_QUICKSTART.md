@@ -1,62 +1,85 @@
-# Local quickstart
+# Development quickstart
 
-This path evaluates and develops Polynovea CMS without cloud accounts.
+Run the Polynovea application and worker directly with Node.js while using a managed Supabase project for PostgreSQL, Auth and the data API.
 
 ## Requirements
 
 - Node.js 22 or newer
-- Docker Desktop, or Docker Engine with the Compose plugin
-- ports `3210` and `54321` available
+- a Supabase project with PostgreSQL 15 or newer
+- a direct session-mode database connection string
 
-## Start the complete environment
+## Install and configure
 
 ```bash
 git clone https://github.com/Polynovea/OSS1.git
 cd OSS1
 npm ci
-npm run local:setup -- --email=owner@example.com --password=change-me-now
+cp .env.example .env.local
 ```
 
-The setup command generates local secrets, builds and starts PostgreSQL, PostgREST, GoTrue, the CMS and worker, creates the supplied identity and owner membership, and seeds a demonstration model and entry. Open `http://localhost:3210` when it completes.
+Set these values in `.env.local`:
 
-Generated secrets and database files live under `.polynovea-local/` and are excluded from Git. Use a strong unique password outside disposable evaluation.
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+DATABASE_URL
+CMS_CONFIG_ENCRYPTION_KEY
+```
 
-## Lifecycle commands
+Enable `pg_trgm` in the Supabase SQL editor. Generate `CMS_CONFIG_ENCRYPTION_KEY` from 32 cryptographically random bytes, and keep every server-only value out of `NEXT_PUBLIC_*` variables.
 
-Set the safety switch before direct lifecycle operations:
+## Initialize the database
 
 ```bash
-export POLYNOVEA_LOCAL_RUNTIME_CONTROL=1
+npm run db:migrate
+```
+
+The migration runner applies numbered migrations in order and records their checksums. Use a fresh project for evaluation. Back up any existing installation before upgrading it.
+
+## Create the first owner
+
+macOS or Linux:
+
+```bash
+export POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD='choose-a-strong-password'
+npm run bootstrap:admin -- --email=owner@example.com --username=owner --display-name="Site Owner"
+unset POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD
 ```
 
 PowerShell:
 
 ```powershell
-$env:POLYNOVEA_LOCAL_RUNTIME_CONTROL="1"
+$env:POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD = "choose-a-strong-password"
+npm run bootstrap:admin -- --email=owner@example.com --username=owner --display-name="Site Owner"
+Remove-Item Env:POLYNOVEA_BOOTSTRAP_ADMIN_PASSWORD
 ```
 
-Then use:
+The command creates a confirmed auth identity when one does not exist, then creates or repairs the auditable CMS owner profile and default-workspace membership.
+
+## Run the application
+
+In one terminal:
 
 ```bash
-npm run local:runtime -- status --directory=.polynovea-local
-npm run local:runtime -- backup --directory=.polynovea-local
-npm run local:runtime -- upgrade --directory=.polynovea-local
-npm run local:runtime -- stop --directory=.polynovea-local
+npm run dev
 ```
 
-Backups are written below `.polynovea-local/backups`. Restore accepts only files from that directory.
+Open `http://localhost:3000` and sign in with the owner credentials.
 
-## Options
+In a second terminal, run the durable worker when evaluating publishing, scheduled releases, webhooks, indexing, image processing, health checks or analytics sync:
 
-- `--no-demo` creates an empty workspace.
-- `--directory=/absolute/path` changes the runtime-data location.
-- Set `POLYNOVEA_LOCAL_APP_PORT` and `POLYNOVEA_LOCAL_SUPABASE_PORT` before first setup to change ports.
+```bash
+npm run worker:delivery
+```
 
-The setup is repeatable: rerunning it reuses the generated runtime configuration and repairs the owner binding without duplicating demo content.
+## Verify before deployment
 
-## Troubleshooting
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
 
-- Confirm Docker is running with `docker version` and `docker compose version`.
-- Inspect services with `docker compose --env-file .polynovea-local/runtime.env -f deploy/local/docker-compose.yml ps`.
-- Add `logs cms`, `logs auth`, or `logs db` to that Compose command to inspect a service.
-- To start over, stop the stack and remove `.polynovea-local` only after confirming that it contains no content or backups you need.
+For a production-oriented sequence, environment hardening and upgrade guidance, continue with the [managed Supabase deployment guide](MANAGED_SUPABASE.md).

@@ -2,7 +2,6 @@ import { createHash, randomUUID } from "node:crypto";
 import { createServiceRoleClient } from "@/lib/admin/serviceRole";
 import { redactCredentials, resolveConnectionCredentials } from "@/lib/infrastructure/credentialProvider";
 import { assertSafeOutboundUrl, safeFetch } from "@/lib/infrastructure/networkSafety";
-import { localRuntimeAllowed } from "@/lib/infrastructure/localRuntime";
 import type { EnvironmentKind } from "@/lib/infrastructure/types";
 import type { OperationalCapabilityState, OperationalWorldEdgeSeed, OperationalWorldNodeSeed } from "@/lib/intelligence/operationalTypes";
 
@@ -265,10 +264,8 @@ function runtimeCapabilitySeeds(environment: any, components: any[], connections
   add("writable_persistence", "Writable persistence capability", persistenceReady ? "present" : "unverified", { activeDatabaseOrStorageConnection: persistenceReady });
   if (environment.kind === "local") {
     add("process_runtime", "Local process runtime", "present", { nodeVersion: process.version, platform: process.platform, arch: process.arch }, "observed");
-    add("container_support", "Container runtime control", localRuntimeAllowed() ? "present" : "unverified", { localRuntimeControlEnabled: localRuntimeAllowed(), providerIdentitySource: "local_configuration" }, "observed");
   } else {
     add("process_runtime", "Remote process runtime", "unverified", { provider: environment.runtime_provider ?? null, reason: "remote runtime is not inferred from the control-plane process" });
-    add("container_support", "Container support", "unverified", { provider: environment.runtime_provider ?? null, reason: "explicit provider/runtime evidence required" });
   }
   add("provider_identity", "Runtime provider identity", environment.runtime_provider ? "present" : "unverified", { provider: environment.runtime_provider ?? null, source: environment.runtime_provider ? "explicit_topology" : "not_declared", metadataProbeUsed: false });
   return { nodes, edges };

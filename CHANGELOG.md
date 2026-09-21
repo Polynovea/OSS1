@@ -6,7 +6,7 @@
 - Added a server-only `bootstrap:admin` command and migration `0064` to retire the legacy client bootstrap policies safely.
 - Admin create/update flows now keep default-workspace membership and system roles synchronized.
 - Added a checksum-ledger-aware `db:migrate` command for fresh installs and controlled upgrades.
-- Made Docker/Compose explicitly optional; the documented OSS V1 path is Node.js plus a supported Supabase/PostgREST-compatible backend.
+- Removed the bundled container runtime and its admin controls; OSS V1 now has one documented Node.js plus Supabase-compatible deployment path.
 - Governed agent identity, provenance and constrained extension foundations.
 - Governed MCP transport package.
 - Supabase browser configuration now fails explicitly when absent; it no longer contains a Polynovea project fallback.
