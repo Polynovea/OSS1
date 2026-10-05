@@ -62,6 +62,17 @@ describe("normalizeAdminUser", () => {
   });
 });
 
+describe("provisioned viewers", () => {
+  it("preserves explicit empty write access", () => {
+    const user = normalizeAdminUser(makeUser({
+      role: "viewer", module_access: ["*"], module_write_access: [],
+    }));
+    expect(hasModuleAccess(user, "cms.blog")).toBe(true);
+    expect(hasModuleWriteAccess(user, "cms.blog")).toBe(false);
+    expect(user.module_write_access).toEqual([]);
+  });
+});
+
 describe("hasSurfaceAccess", () => {
   it("denies access for null/inactive users", () => {
     expect(hasSurfaceAccess(null, "cms")).toBe(false);

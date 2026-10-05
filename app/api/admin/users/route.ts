@@ -111,13 +111,25 @@ export async function POST(req: Request) {
       created_by: auth.data?.profile.email ?? "system",
     };
 
-    const { data, error } = await serviceRoleSupabase
+    // The Auth trigger may already have provisioned this identity as a viewer.
+    const { data: provisioned, error: lookupError } = await serviceRoleSupabase
       .from("admin_users")
-      .insert(payload)
+      .select("id")
+      .eq("auth_user_id", authUser.id)
+      .maybeSingle();
+    if (lookupError) {
+      await identity.deleteUser(authUser.id);
+      return NextResponse.json({ success: false, data: null, error: lookupError.message, timestamp: ts() }, { status: 500 });
+    }
+    const profileMutation = provisioned
+      ? serviceRoleSupabase.from("admin_users").update(payload).eq("id", provisioned.id)
+      : serviceRoleSupabase.from("admin_users").insert(payload);
+    const { data, error } = await profileMutation
       .select("*")
       .single();
 
     if (error) {
+      if (provisioned) await serviceRoleSupabase.from("admin_users").delete().eq("id", provisioned.id);
       await identity.deleteUser(authUser.id);
       return NextResponse.json({ success: false, data: null, error: error.message, timestamp: ts() }, { status: 500 });
     }

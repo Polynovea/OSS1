@@ -130,7 +130,7 @@ export function normalizeAdminUser(value: Partial<AdminUser> & { username: strin
     is_active: value.is_active ?? true,
     surface_access: normalizeStringArray(value.surface_access),
     module_access: readModules,
-    module_write_access: writeModules.length ? writeModules : readModules,
+    module_write_access: Array.isArray(value.module_write_access) ? writeModules : readModules,
     created_by: value.created_by ?? null,
     created_at: value.created_at ?? new Date().toISOString(),
     updated_at: value.updated_at ?? new Date().toISOString(),

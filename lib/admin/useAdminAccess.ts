@@ -8,6 +8,7 @@ import type { AdminUser } from "@/lib/admin/types";
 export function useAdminAccess() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<AdminUser | null>(null);
+  const [accessError, setAccessError] = useState("");
   const [checked, setChecked] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -22,6 +23,7 @@ export function useAdminAccess() {
 
       if (!nextSession) {
         setProfile(null);
+        setAccessError("");
         setChecked(true);
         return;
       }
@@ -33,10 +35,21 @@ export function useAdminAccess() {
             "Content-Type": "application/json",
           },
         });
-        const json = res.ok ? await res.json() : null;
+        const json = await res.json().catch(() => null);
+        if (!res.ok) {
+          setProfile(null);
+          setAccessError(
+            res.status === 403
+              ? "Your credentials are valid, but this account has not been granted CMS access. Ask an owner to provision or activate it."
+              : (json?.error || "Could not verify CMS access."),
+          );
+          return;
+        }
         setProfile(json?.data ?? null);
+        setAccessError("");
       } catch {
         setProfile(null);
+        setAccessError("Could not verify CMS access. Please try again.");
       } finally {
         setChecked(true);
       }
@@ -48,6 +61,7 @@ export function useAdminAccess() {
         void identity.signOut();
         setSession(null);
         setProfile(null);
+        setAccessError("");
         setChecked(true);
         return;
       }
@@ -66,6 +80,7 @@ export function useAdminAccess() {
     profile,
     checked,
     allowed: Boolean(session && profile),
+    accessError,
     refresh,
   };
 }

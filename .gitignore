@@ -17,3 +17,4 @@ ui-ux-pro-max-skill/
 BACKEND_SPEC.md
 
 .vercel
+.env*

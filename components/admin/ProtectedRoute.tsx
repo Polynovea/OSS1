@@ -184,7 +184,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { session, profile, checked, allowed } = useAdminAccess();
+  const { session, profile, checked, allowed, accessError } = useAdminAccess();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,7 +208,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   if (!session || !allowed) {
-    return <LoginScreen identifier={identifier} setIdentifier={setIdentifier} password={password} setPassword={setPassword} error={error} loading={loading} onSubmit={handleLogin} />;
+    return <LoginScreen identifier={identifier} setIdentifier={setIdentifier} password={password} setPassword={setPassword} error={error || accessError} loading={loading} onSubmit={handleLogin} />;
   }
 
   if (!canAccessPath(profile, pathname)) {
