@@ -1,13 +1,14 @@
 -- Enable once after disabling public signups in Supabase Auth settings.
 -- Opt-in: some installations share Auth with public-facing applications.
-create table public.cms_auth_provisioning (
+create table if not exists public.cms_auth_provisioning (
   singleton boolean primary key default true check (singleton),
   enabled boolean not null default false,
   workspace_slug text not null default 'polynovea'
 );
 alter table public.cms_auth_provisioning enable row level security;
 revoke all on public.cms_auth_provisioning from public, anon, authenticated;
-insert into public.cms_auth_provisioning (singleton) values (true);
+insert into public.cms_auth_provisioning (singleton) values (true)
+on conflict (singleton) do nothing;
 
 create or replace function public.provision_managed_auth_user()
 returns trigger language plpgsql security definer set search_path = ''
@@ -56,6 +57,7 @@ revoke all on function public.provision_managed_auth_user() from public, anon, a
 do $$
 begin
   if to_regclass('auth.users') is not null then
+    execute 'drop trigger if exists cms_managed_auth_user_created on auth.users';
     execute 'create trigger cms_managed_auth_user_created after insert on auth.users
       for each row execute function public.provision_managed_auth_user()';
   end if;
